@@ -1,4 +1,3 @@
-import { categorySchema } from "./../schemas/categoriesSchemas.js";
 import connection from "./../db.js";
 
 export async function getCategories(req, res) {
@@ -13,16 +12,6 @@ export async function getCategories(req, res) {
 }
 
 export async function sendCategory(req, res) {
-    const validation = categorySchema.validate(req.body, {
-        abortEarly: false,
-    });
-
-    if (validation.error) {
-        console.log(validation.error.details.map((detail) => detail.message));
-        res.sendStatus(400);
-        return;
-    }
-
     try {
         const result = await connection.query(
             `SELECT * 
