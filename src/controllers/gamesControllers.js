@@ -1,20 +1,72 @@
+import { gameSchema } from "./../schemas/gamesSchemas.js";
 import connection from "./../db.js";
 
 export async function getGames(req, res) {
     let filter = req.query.name?.toLowerCase();
-    filter = filter ? filter : "";
+    filter = filter ? filter + "%" : "%";
 
-    try{
-        const result = await connection.query(`
-            SELECT games.*, categories.name AS "categoryName" 
+    try {
+        const result = await connection.query(
+            `SELECT games.*, categories.name AS "categoryName" 
             FROM games
             JOIN categories ON games."categoryId" = categories.id
             WHERE LOWER(games.name) 
-            LIKE '${filter}%'
-        `);
-        
+            LIKE $1
+        `,
+            [filter]
+        );
+
         res.send(result.rows);
-    } catch(e){
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(500);
+        return;
+    }
+}
+
+export async function sendGame(req, res) {
+    const validation = gameSchema.validate(req.body, { abortEarly: false });
+
+    if (validation.error) {
+        console.log(validation.error.details.map((detail) => detail.message));
+        res.sendStatus(400);
+        return;
+    }
+
+    const { name, image, stockTotal, categoryId, pricePerDay } = req.body;
+
+    try {
+        const category = await connection.query(
+            `SELECT * FROM categories
+            WHERE id = $1
+        `, [categoryId]
+        );
+
+        if (category.rows.length === 0) {
+            res.sendStatus(400);
+            return;
+        }
+
+        const result = await connection.query(
+            `SELECT * FROM games
+            WHERE name = $1
+            `, [name]
+        );
+
+        if (result.rows.length > 0) {
+            res.sendStatus(409);
+            return;
+        }
+
+        await connection.query(
+            `INSERT INTO games
+            (name, image, "stockTotal", "categoryId", "pricePerDay")
+            VALUES ($1, $2, $3, $4, $5)
+            `,
+            [name, image, stockTotal, categoryId, pricePerDay]
+        );
+        res.sendStatus(201);
+    } catch (e) {
         console.log(e);
         res.sendStatus(500);
         return;
