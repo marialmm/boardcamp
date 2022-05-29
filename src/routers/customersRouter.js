@@ -5,7 +5,7 @@ import {
     getCustomers,
     sendCustomer,
 } from "./../controllers/customersControllers.js";
-import { validateSchema } from "./../middlewares/validationMiddleware.js";
+import { validateSchema } from "../middlewares/joiValidationMiddleware.js";
 import { customerSchema } from "./../schemas/customersSchemas.js";
 
 const customersRouter = Router();

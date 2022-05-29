@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { validateSchema } from "../middlewares/validationMiddleware.js";
+import { validateSchema } from "../middlewares/joiValidationMiddleware.js";
 import { categorySchema } from "../schemas/categoriesSchemas.js";
 import {
     getCategories,
