@@ -12,7 +12,7 @@ gamesRouter.post(
     (req, res, next) => {
         validateSchema(req, res, next, gameSchema);
     }, checkGameExists,
-    sendGame 
+    sendGame
 );
 
 export default gamesRouter;

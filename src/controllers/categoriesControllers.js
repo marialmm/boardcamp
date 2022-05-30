@@ -13,17 +13,7 @@ export async function getCategories(req, res) {
 
 export async function sendCategory(req, res) {
     try {
-        const result = await connection.query(
-            `SELECT * 
-            FROM categories 
-            WHERE name=$1`,
-            [req.body.name]
-        );
-
-        if (result.rows.length > 0) {
-            res.sendStatus(409);
-            return;
-        }
+        
 
         await connection.query(
             `

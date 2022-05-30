@@ -1,7 +1,8 @@
 import { Router } from "express";
 
-import { validateSchema } from "../middlewares/joiValidationMiddleware.js";
-import { categorySchema } from "../schemas/categoriesSchemas.js";
+import { checkCategoryExists } from "./../middlewares/checkExistsMiddleware.js";
+import { validateSchema } from "./../middlewares/joiValidationMiddleware.js";
+import { categorySchema } from "./../schemas/categoriesSchemas.js";
 import {
     getCategories,
     sendCategory,
@@ -16,6 +17,7 @@ categoriesRouter.post(
     (req, res, next) => {
         validateSchema(req, res, next, categorySchema);
     },
+    checkCategoryExists,
     sendCategory
 );
 

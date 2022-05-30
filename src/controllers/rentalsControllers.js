@@ -93,7 +93,7 @@ export async function sendRental(req, res) {
 
         const rentalsResult = await connection.query(
             `SELECT * FROM rentals
-            WHERE "gameId" = $1`,
+            WHERE "gameId" = $1 AND "returnDate" = null`,
             [gameId]
         );
 
@@ -102,6 +102,7 @@ export async function sendRental(req, res) {
             rentalsResult.rows.length >= game.stockTotal
         ) {
             res.sendStatus(400);
+            return;
         }
 
         await connection.query(
@@ -157,7 +158,7 @@ export async function returnRental(req, res) {
         } else {
             delayFee = 0;
         }
-        
+
         await connection.query(
             `UPDATE rentals
             SET "returnDate" = $1,

@@ -1,5 +1,26 @@
 import connection from "../db.js";
 
+export async function checkCategoryExists(req, res, next) {
+    try {
+        const categoryResult = await connection.query(
+            `SELECT * 
+            FROM categories 
+            WHERE name=$1`,
+            [req.body.name]
+        );
+
+        if (categoryResult.rows.length > 0) {
+            res.sendStatus(409);
+            return;
+        }
+
+        next();
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+}
+
 export async function checkGameExists(req, res, next) {
     const name = req.body.name;
 
