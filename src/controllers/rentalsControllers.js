@@ -48,8 +48,7 @@ export async function getRentals(req, res) {
                     name: gameName,
                     categoryId: categoryId,
                     categoryName: categoryName,
-                }
-                
+                },
             };
         });
 
@@ -127,4 +126,73 @@ export async function sendRental(req, res) {
     }
 }
 
-export async function returnRental(req, res) {}
+export async function returnRental(req, res) {
+    const rental = res.locals.rental;
+
+    if(rental.returnDate !== null){
+        res.sendStatus(400);
+        return;
+    }
+    const returnDate = new Date().toISOString();
+    try {
+        const gameResult = await connection.query(
+            `SELECT * FROM games
+            WHERE id = $1`, [rental.gameId]
+        );
+
+        const game = gameResult.rows[0];
+        
+        const daysToMilliseconds = 86400000;
+        const idealReturnDate = new Date(
+            new Date(rental.rentDate).getTime() +
+                rental.daysRented * daysToMilliseconds
+        );
+
+        let delayFee;
+
+        if (new Date(returnDate) > new Date(idealReturnDate)) {
+            const delay = (new Date(new Date(returnDate).getTime() - new Date(rental.rentDate).getTime())) / daysToMilliseconds;
+
+            delayFee = Math.floor(delay) *game.pricePerDay
+        } else {
+            delayFee = 0;
+        }
+        
+        await connection.query(
+            `UPDATE rentals
+            SET "returnDate" = $1,
+            "delayFee" = $2
+            WHERE id = $3
+            `, [returnDate, delayFee, rental.id]
+        );
+
+        res.sendStatus(200);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+}
+
+export async function deleteRental(req, res) {
+    const id = req.params.id;
+    const rental = res.locals.rental;
+
+    if (rental.returnDate !== null) {
+        res.sendStatus(400);
+        return;
+    }
+
+    try {
+        const rentalResult = await connection.query(
+            `DELETE FROM rentals
+            WHERE id = $1
+            `,
+            [id]
+        );
+
+        res.sendStatus(200);
+    } catch (e) {
+        console.log(e);
+        res.sendStatus(500);
+    }
+}

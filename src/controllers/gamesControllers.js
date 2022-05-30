@@ -38,16 +38,7 @@ export async function sendGame(req, res) {
             return;
         }
 
-        const result = await connection.query(
-            `SELECT * FROM games
-            WHERE name = $1
-            `, [name]
-        );
-
-        if (result.rows.length > 0) {
-            res.sendStatus(409);
-            return;
-        }
+        
 
         await connection.query(
             `INSERT INTO games
